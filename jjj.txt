@@ -1,0 +1,455 @@
+#include <iostream>
+#include <windows.h>
+#include <cmath>
+#ifdef _WIN32
+    #define APIENTRY __stdcall
+#endif
+#include <settings/libs/src/glad.c>
+#ifdef _WINDOWS_
+#endif
+#define GLEW_STATIC
+#include <settings/libs/glad/glad.h>
+#include <glfw3.h>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <settings/classes/shader.h>
+#include <settings/classes/resource_manager.h>
+#include "settings/classes/display.h"
+#include "settings/classes/imgu_manager.h"
+#include "settings/objects/cube.h"
+#include "settings/objects/camera.h"
+#include "settings/objects/light.h"
+#include "settings/classes/model.h"
+#include "settings/classes/decor.h"
+#include "settings/objects/plain.h"
+#include "settings/objects/skybox.h"
+#include "settings/classes/framebuffer.h"
+#include "settings/classes/shader_global_buffer.h"
+#include "settings/classes/anti_aliasing.h"
+#include "settings/objects/cube_cluster.h"
+#include "settings/objects/instance.h"
+#include "settings/classes/shadow_map.h"
+
+static void glfw_error_callback(int error, const char* description)
+{
+    fprintf(stderr, "Glfw Error %d: %s\n", error, description);
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void processInput(GLFWwindow *window);
+unsigned int loadTexture(const char *path);
+
+// settings
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
+
+// camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+float lastX = SCR_WIDTH / 2.0f;
+float lastY = SCR_HEIGHT / 2.0f;
+bool firstMouse = true;
+
+// timing
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
+bool cursorFlag = false;
+float lastCursorReaction = 0;
+
+int main(int, char**)
+{
+    camera.MovementSpeed = 6;
+    // Setup window
+    //glfwSetErrorCallback(glfw_error_callback);
+    if (!glfwInit())
+        return 1;
+
+    //glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER  , GL_TRUE);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OPENGL", NULL, NULL);
+    if (window == nullptr)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    glfwSwapInterval(1); // Enable vsync
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    bool err = gladLoadGL() == 0;
+
+    if (err)
+    {
+        fprintf(stderr, "Failed to initialize OpenGL loader!\n");
+        return 1;
+    }
+    ResourceManager::path = "C://Users//ar725//Documents//qt//graph//";
+    ResourceManager::toShaders = "settings//shaders//";
+    ResourceManager::toTextures = "settings//textures//";
+    ResourceManager::toVertices = "settings//vertices//";
+
+    ResourceManager::LoadShader("cube//cube.vert", "cube//cube.frag", "", "cube");
+    //ResourceManager::LoadShader("model//model.vert", "model//model.frag", "model//model.geom", "model");
+    ResourceManager::LoadShader("model//model.vert", "model//model.frag", "", "model");
+    ResourceManager::LoadShader("model_cluster//model_cluster.vert", "model_cluster//model_cluster.frag", "model_cluster//model_cluster.geom", "model_cluster");
+    ResourceManager::LoadShader("light//light.vert", "light//light.frag", "", "light");
+    ResourceManager::LoadShader("stencil//stencil.vert", "stencil//stencil.frag", "", "stencil");
+    ResourceManager::LoadShader("screen//screen.vert", "screen//screen.frag", "", "screen");
+    ResourceManager::LoadShader("skybox//skybox.vert", "skybox//skybox.frag", "", "skybox");
+    ResourceManager::LoadShader("blinn_phong//blinn_phong.vert", "blinn_phong//blinn_phong.frag", "", "blinn_phong");
+    ResourceManager::LoadShader("refraction//refraction.vert", "refraction//refraction.frag", "", "refraction");
+    ResourceManager::LoadShader("instance//instance.vert", "instance//instance.frag", "", "instance");
+    ResourceManager::LoadShader("cluster//cluster.vert", "cluster//cluster.frag", "//cluster//cluster.geom", "cluster");////cluster//cluster.geom
+    ResourceManager::LoadShader("blinn_phong_shadow//blinn_phong_shadow.vert", "blinn_phong_shadow//blinn_phong_shadow.frag", "", "blinn_phong_shadow");
+    ResourceManager::LoadShader("shadow_map//shadow_map.vert", "shadow_map//shadow_map.frag", "", "shadow_map");
+
+    ResourceManager::LoadTexture("box.png", true, "box");
+    ResourceManager::LoadTexture("matrix.png", true, "matrix");
+    ResourceManager::LoadTexture("specbox.png", true, "specbox");
+    ResourceManager::LoadTexture("grass.png", true, "grass");
+    ResourceManager::LoadTexture("window.png", true, "window");
+    ResourceManager::LoadTexture("wood.png", true, "wood");
+
+    ResourceManager::LoadTextureMaterial("material", {
+           ResourceManager::GetTexture("window"),
+           ResourceManager::GetTexture("window"),
+           ResourceManager::GetTexture("window"),
+                                             40, "textureMaterial"
+                                         });
+
+    ResourceManager::LoadTextureMaterial("box", {
+           ResourceManager::GetTexture("box"),
+           ResourceManager::GetTexture("box"),
+           ResourceManager::GetTexture("specbox"),
+                                             40, "textureMaterial"
+                                         });
+
+    ResourceManager::LoadTextureMaterial("grassmat", {
+           ResourceManager::GetTexture("grass"),
+           ResourceManager::GetTexture("grass"),
+           ResourceManager::GetTexture("grass"),
+                                             40, "textureMaterial",
+                                         });
+    ResourceManager::LoadTextureMaterial("woodmat", {
+           ResourceManager::GetTexture("wood"),
+           ResourceManager::GetTexture("wood"),
+           ResourceManager::GetTexture("wood"),
+                                             40, "textureMaterial",
+                                         });
+
+    ResourceManager::LoadColorMaterial("silver", {
+                                      {0.19225, 0.19225,0.19225},
+                                      {0.50754, 0.50754, 0.50754},
+                                      {0.508273, 0.508273, 0.508273},
+                                      40, "colorMaterial"
+                                  });
+
+    ResourceManager::LoadDirectionLight("light", {
+                                      {0.1f, 0.1f, 0.1f},
+                                      {0.8f, 0.8f, 0.8f},
+                                      {1.0f, 1.0f, 1.0f},
+                                      camera.Front,
+                                      glm::cos(glm::radians(17.5f)),
+                                      glm::cos(glm::radians(12.5f)),
+                                      1, 0.09, 0.032,
+                                      "light",
+                                  });
+    ResourceManager::PointLightArray = {
+        {
+            {0.05f, 0.05f, 0.05f},
+            {0.8f, 0.8f, 0.8f},
+            {1.0f, 1.0f, 1.0f},
+            1, 0.09, 0.032, "pointLights"
+        },
+        {
+            {0.05f, 0.05f, 0.05f},
+            {0.8f, 0.8f, 0.8f},
+            {1.0f, 1.0f, 1.0f},
+            1, 0.09, 0.032, "pointLights"
+        },
+        {
+            {0.05f, 0.05f, 0.05f},
+            {0.8f, 0.8f, 0.8f},
+            {1.0f, 1.0f, 1.0f},
+            1, 0.09, 0.032, "pointLights"
+        },
+        {
+            {0.05f, 0.05f, 0.05f},
+            {0.8f, 0.8f, 0.8f},
+            {1.0f, 1.0f, 1.0f},
+            1, 0.09, 0.032, "pointLights"
+        }
+    };
+    std::string n = std::to_string(19);
+    ResourceManager::LoadCubeMap({
+                                     "textures//Ely"+n+"//Ely"+n+"_px.jpg",
+                                     "textures//Ely"+n+"//Ely"+n+"_nx.jpg",
+                                     "textures//Ely"+n+"//Ely"+n+"_py.jpg",
+                                     "textures//Ely"+n+"//Ely"+n+"_ny.jpg",
+                                     "textures//Ely"+n+"//Ely"+n+"_pz.jpg",
+                                     "textures//Ely"+n+"//Ely"+n+"_nz.jpg",
+                                 },n);
+    cube box;
+    plain sheet;
+    light source;
+    skybox sky;
+    CubeCluster cluster;
+    AntiAliasing screen(SCR_WIDTH, SCR_HEIGHT);
+    //framebuffer screen(SCR_WIDTH, SCR_HEIGHT);
+    //framebuffer test(SCR_WIDTH, SCR_HEIGHT);
+    ResourceManager::GetShader("model").Use();
+    //Model nanosoult("C://Users//ar725//Documents//qt//graph//settings//models//nanosuit//nanosuit.obj");
+    //Model nanosoult("C://Users//ar725//Documents//qt//graph//settings//models//sponza//sponza.obj");
+      Model nanosoult("C://Users//ar725//Documents//qt//graph//settings//models//black_girl//girl.obj");
+      Model rock("C://Users//ar725//Documents//qt//graph//settings//models//rock//rock.obj");
+
+
+    glm::vec3 cubePositions[] = {
+            glm::vec3( 0.0f,  0.0f,  0.0f),
+            glm::vec3( 2.0f,  5.0f, -15.0f),
+            glm::vec3(-1.5f, -2.2f, -2.5f),
+            glm::vec3(-3.8f, -2.0f, -12.3f),
+            glm::vec3( 2.4f, -0.4f, -3.5f),
+            glm::vec3(-1.7f,  3.0f, -7.5f),
+            glm::vec3( 1.3f, -2.0f, -2.5f),
+            glm::vec3( 1.5f,  2.0f, -2.5f),
+            glm::vec3( 1.5f,  0.2f, -1.5f),
+            glm::vec3(-1.3f,  1.0f, -1.5f)
+        };
+    std::vector<glm::vec3> pointLightPositions = {
+        { 0.7f,  0.2f,  2.0f},
+        { 2.3f, -3.3f, -4.0f},
+        {-4.0f,  2.0f, -12.0f},
+        { 0.0f,  0.0f, -3.0f}
+        };
+    imgu_manager interf(window);
+    int k = 1;
+    for(int i=0; i<k; i++) {
+        for(int j=0; j<k; j++) {
+            for(int l=0; l<k; l++) {
+                pointLightPositions.push_back({i*6 + 4, j*6 +0.5, l*6 +0.5});
+                glm::vec3 color = glm::vec3((rand()%10 + 5)/5,(rand()%5 + 5)/5,(rand()%10 + 5)/5);
+                ResourceManager::PointLightArray.push_back({
+                                                               {0.05f, 0.05f, 0.05f},
+                                                               {1, 1, 0},
+                                                               {1.0f, 1.0f, 1.0f},
+                                                               1, 0.09, 0.032, "pointLights"
+                                                           });
+            }
+        }
+    }
+
+    glEnable(GL_DEPTH_TEST);
+     glEnable(GL_PROGRAM_POINT_SIZE);
+     glDepthFunc(GL_ALWAYS);
+     glDepthFunc(GL_LESS);
+     glEnable(GL_STENCIL_TEST);
+     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
+     glEnable(GL_BLEND);
+     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+     glEnable(GL_MULTISAMPLE);
+
+     //glEnable(GL_FRAMEBUFFER_SRGB);
+    DepthTesting depth = {0.1, 100, false};
+    PostProcessing proc;
+     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    ShaderGlobalBuffer shProjView({ "cube", "light", "stencil",
+                                    "model", "cluster", "instance",
+                                  "refraction", "blinn_phong_shadow"});
+
+    instance inst(rock);
+
+    ShadowMap shadowMap;
+
+    glm::vec3 lightPos = {-2.0f, 1.0f, -1.0f};
+
+    while (!glfwWindowShouldClose(window))
+    {
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
+        glfwPollEvents();
+        processInput(window);
+        //lightPos = camera.Position;
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 projview = projection * view;
+        shProjView.Bind(projection, view);
+
+        ResourceManager::DirectionLights["light"].direction = camera.Front;
+
+
+        proc.kernelMat[4] = sin(glfwGetTime())*4 + 4;
+        /*sheet.Drow({0,-4, -3}, pointLightPositions, camera.Position, "woodmat", glm::vec3(30), 3.14/2, {1,0,0},
+                   ResourceManager::GetShader("blinn_phong"));*/
+
+        shadowMap.Begin();
+
+        float near_plane = 1.0f, far_plane = 7.5f;
+        glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_plane, far_plane);
+        glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+        glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+        box.DrowWithShadow({0, -3.5, 1}, lightSpaceMatrix, lightPos, camera.Position, 0,
+                           ResourceManager::GetShader("shadow_map"));
+        box.DrowWithShadow({-0.6, -1.5, 0.4}, lightSpaceMatrix, lightPos, camera.Position, 0,
+                           ResourceManager::GetShader("shadow_map"));
+        sheet.DrowWithShadow({0,-5, 0}, lightSpaceMatrix, lightPos, camera.Position, "woodmat", 0, glm::vec3(50), 3.14/2, {1,0,0},
+                   ResourceManager::GetShader("shadow_map"));
+        shadowMap.End(SCR_WIDTH, SCR_HEIGHT);
+
+        screen.Begin();
+        glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        glStencilMask(0x00);
+
+        //ResourceManager::GetTextureMaterial("woodmat").ambient.ID = shadowMap.depthMap;
+        //ResourceManager::GetTextureMaterial("woodmat").diffuse.ID = shadowMap.depthMap;
+
+        sky.Drow(glm::mat4(glm::mat3(camera.GetViewMatrix())), projection, "19");
+
+        sheet.Drow({0,0, -4}, pointLightPositions, camera.Position, "grassmat");
+
+        box.DrowWithShadow({0, -3.5, 1}, projview, lightPos, camera.Position, shadowMap.depthMap);
+        box.DrowWithShadow({-0.6, -1.5, 0.4}, projview, lightPos, camera.Position, shadowMap.depthMap);
+        sheet.DrowWithShadow({0,-5, 0}, lightSpaceMatrix, lightPos, camera.Position, "woodmat", shadowMap.depthMap, glm::vec3(50), 3.14/2, {1,0,0},
+                   ResourceManager::GetShader("blinn_phong_shadow"));
+        inst.Drow(camera.Position);
+
+        for(size_t i=0; i<pointLightPositions.size();i++) {
+            source.Prop = {pointLightPositions[i], ResourceManager::PointLightArray[i].diffuse};
+            source.Drow();
+        }
+        cluster.Drow({3,0,0}, pointLightPositions, camera.Position);
+
+
+        for(auto a: cubePositions)
+            box.Drow(a, pointLightPositions, camera.Position);
+
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+
+        nanosoult.Draw(ResourceManager::GetShader("model"), {0,0,-30},
+                       glm::vec3(0.02), pointLightPositions, depth);
+        //nanosoult.Draw(ResourceManager::GetShader("model_cluster"), {0,0,-30},
+         //              glm::vec3(0.02), pointLightPositions, depth);
+
+
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
+
+        nanosoult.Draw(ResourceManager::GetShader("stencil"), {0,0,-30},
+                       glm::vec3(0.02), pointLightPositions, depth);
+
+        glStencilMask(0xFF);
+        glEnable(GL_DEPTH_TEST);
+
+        screen.End();
+        //screen.textureColorbuffer = shadowMap.depthMap;
+        screen.Drow(proc);
+
+        if(cursorFlag) {
+            interf.Begin();
+            interf.drowDepthTesting(depth);
+            interf.drowPostProcessing(proc);
+            interf.drowColorMaterial(ResourceManager::ColorMaterials["silver"]);
+            for(int i=0; i<4; i++)
+                interf.drowPointLight(ResourceManager::PointLightArray[i], std::to_string(i));
+            interf.End();
+        }
+
+        glfwSwapBuffers(window);
+    }
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+
+    return 0;
+}
+
+void processInput(GLFWwindow *window)
+{
+    bool cursorEnabling = (glfwGetTime() - lastCursorReaction) > 0.3;
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+    if ( ( glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS ) && cursorEnabling) {
+        if(cursorFlag) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            cursorFlag = !cursorFlag;
+        } else {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            cursorFlag = !cursorFlag;
+        }
+        lastCursorReaction = glfwGetTime();
+    }
+
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera.ProcessKeyboard(FORWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera.ProcessKeyboard(LEFT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera.ProcessKeyboard(RIGHT, deltaTime);
+}
+
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // make sure the viewport matches the new window dimensions; note that width and
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+}
+
+// glfw: whenever the mouse moves, this callback is called
+// -------------------------------------------------------
+void mouse_callback(GLFWwindow* window, double xpos, double ypos)
+{
+    if(cursorFlag)
+        return;
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
+    lastX = xpos;
+    lastY = ypos;
+
+    camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if(cursorFlag)
+        return;
+    camera.ProcessMouseScroll(yoffset);
+}

@@ -75,8 +75,27 @@ float lastCursorReaction = 0;
 void renderOmniShadowScene(ShadowOmniMapArgs args, Cube cube);
 void renderOmniShadowScene(PhongOmniShadowArgs args, Cube cube);
 
+#include <irrKlang.h>
+
+#if defined(WIN32)
+#include <conio.h>
+#else
+#include "../common/conio.h"
+#endif
+
+using namespace irrklang;
+
 int main()
 {
+    std::cout << "Start..." << std::endl;
+    ISoundEngine* engine = createIrrKlangDevice();
+
+    if (!engine) {
+        printf("Could not startup enginen");
+        return 0; // error starting up the engine
+    }
+    //engine->play2D("C://Users//ar725//Desktop//new-graph//irrKlang-1.6.0//media//getout.ogg", true);
+
     glm::vec3(0.0f, 0.0f, 3.0f);
     //-------------------------------------------- GLFW CONFIGS ---------------
     camera.MovementSpeed = 6;

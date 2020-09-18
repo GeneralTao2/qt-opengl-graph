@@ -5,10 +5,7 @@ CONFIG -= qt
 QMAKE_CXXFLAGS += -g3
 QT += opengl
 
-win32: LIBS += -L$$PWD/'../Simple OpenGL Image Library/lib/' -lSOIL
 
-INCLUDEPATH += $$PWD/'../Simple OpenGL Image Library'
-DEPENDPATH += $$PWD/'../Simple OpenGL Image Library'
 
 LIBS += -lopengl32
 
@@ -52,14 +49,22 @@ SOURCES += \
     settings/tools/main_tool.cpp
 
 win32: LIBS += -L$$PWD/../GLFW/lib-mingw/ -lglfw3
+#
+#INCLUDEPATH += $$PWD/../GLFW/lib-mingw
+#DEPENDPATH += $$PWD/../GLFW/lib-mingw
+#
+#win32: LIBS += -L$$PWD/../GLFW/lib-mingw/ -lglfw3dll
+#
+#INCLUDEPATH += $$PWD/../GLFW/lib-mingw
+#DEPENDPATH += $$PWD/../GLFW/lib-mingw
 
-INCLUDEPATH += $$PWD/../GLFW/lib-mingw
-DEPENDPATH += $$PWD/../GLFW/lib-mingw
+#win32: LIBS += -L$$PWD/../GLFW/glfw-build/src/ -lglfw3
 
-win32: LIBS += -L$$PWD/../GLFW/lib-mingw/ -lglfw3dll
+INCLUDEPATH += $$PWD/../GLFW/include
+DEPENDPATH += $$PWD/../GLFW/include
 
-INCLUDEPATH += $$PWD/../GLFW/lib-mingw
-DEPENDPATH += $$PWD/../GLFW/lib-mingw
+
+
 
 
 INCLUDEPATH += $$PWD/../GLFW/include/GLFW/
@@ -72,31 +77,48 @@ DEPENDPATH += E:/Programs/qt/Tools/mingw530_32/i686-w64-mingw32/include
 
 
 
-win32: LIBS += -L$$PWD/../irrKlang-1.5.0/lib/Win32-gcc/ -lirrKlang
+win32: LIBS += -L$$PWD/../irrKlang-1.6.0/lib/Win32-gcc/ -lirrKlang
 
-INCLUDEPATH += $$PWD/../irrKlang-1.5.0/lib/Win32-gcc
-DEPENDPATH += $$PWD/../irrKlang-1.5.0/lib/Win32-gcc
+INCLUDEPATH += $$PWD/../irrKlang-1.6.0/lib/Win32-gcc
+DEPENDPATH += $$PWD/../irrKlang-1.6.0/lib/Win32-gcc
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../irrKlang-1.5.0/lib/Win32-gcc/irrKlang.lib
-else:win32-g++: PRE_TARGETDEPS += $$PWD/../irrKlang-1.5.0/lib/Win32-gcc/libirrKlang.a
+INCLUDEPATH += $$PWD/../irrKlang-1.6.0/include
 
-LIBS += -L$$PWD/../irrKlang-1.5.0/bin/win32-gcc/ -likpMP3
-INCLUDEPATH += $$PWD/../irrKlang-1.5.0/include
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../irrKlang-1.6.0/lib/Win32-gcc/irrKlang.lib
+else:win32-g++: PRE_TARGETDEPS += $$PWD/../irrKlang-1.6.0/lib/Win32-gcc/libirrKlang.a
 
-LIBS += -L$$PWD/../irrKlang-1.5.0/bin/win32-gcc/ -lirrKlang
-INCLUDEPATH += $$PWD/../irrKlang-1.5.0/include
+LIBS += -L$$PWD/../irrKlang-1.6.0/bin/win32-gcc/ -likpMP3
+INCLUDEPATH += $$PWD/../irrKlang-1.6.0/include
+#
+#LIBS += -L$$PWD/../irrKlang-1.6.0/bin/win32-gcc/ -lirrKlang
+#INCLUDEPATH += $$PWD/../irrKlang-1.6.0/include
 
-win32: LIBS += -L$$PWD/../assimp-4.0.1-build/code/ -llibassimp.dll
-
-INCLUDEPATH += $$PWD/../assimp-4.0.1/include
-INCLUDEPATH += $$PWD/../assimp-4.0.1-build/include
-DEPENDPATH += $$PWD/../assimp-4.0.1/include
+#win32: LIBS += -L$$PWD/../assimp-4.0.1-build/code/ -llibassimp.dll
+#
+#INCLUDEPATH += $$PWD/../assimp-4.0.1/include
+#INCLUDEPATH += $$PWD/../assimp-4.0.1-build/include
+#DEPENDPATH += $$PWD/../assimp-4.0.1/include
 
 
 win32: LIBS += -L$$PWD/../GnuWin32/lib/f/ -lfreetype
 
 INCLUDEPATH += $$PWD/../GnuWin32/include
 DEPENDPATH += $$PWD/../GnuWin32/include
+
+#win32: LIBS += -L$$PWD/../freetype2-build/ -lfreetype
+#
+#INCLUDEPATH += $$PWD/../freetype2-build/include/
+#INCLUDEPATH += $$PWD/../freetype2/include/
+#DEPENDPATH += $$PWD/../freetype2/include/
+
+#win32: LIBS += -L$$PWD/../freetype2-build/ -lfreetype
+#
+#INCLUDEPATH += $$PWD/../freetype2/include
+#DEPENDPATH += $$PWD/../freetype2/include
+
+
+
+
 
 INCLUDEPATH += $$PWD/settings/libs/imgui-master
 INCLUDEPATH += $$PWD/settings/libs/imgui-master/examples
@@ -181,5 +203,3 @@ win32: LIBS += -L$$PWD/assimp-4.0.1-build/code/ -llibassimp.dll
 
 INCLUDEPATH += $$PWD/assimp-4.0.1/include
 INCLUDEPATH += $$PWD/assimp-4.0.1-build/include
-DEPENDPATH += $$PWD/assimp-4.0.1/include
-
