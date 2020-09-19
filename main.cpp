@@ -1,14 +1,14 @@
 #include <iostream>
-#include <windows.h>
+//#include <windows.h>
 #include <cmath>
 #ifdef _WIN32
     #define APIENTRY __stdcall
 #endif
-#include <settings/libs/src/glad.c>
+#include <src/glad.c>
 #ifdef _WINDOWS_
 #endif
 #define GLEW_STATIC
-#include <settings/libs/glad/glad.h>
+#include <glad/glad.h>
 #include <glfw3.h>
 #include <vector>
 #include <fstream>
@@ -37,6 +37,8 @@
 #include "settings/objects/cube_normal_mapped.h"
 #include "settings/classes/bloom_mapping.h"
 #include "settings/implant/bloom.h"
+
+#include <filesystem>
 
 
 static void glfw_error_callback(int error, const char* description)
@@ -80,7 +82,7 @@ void renderOmniShadowScene(PhongOmniShadowArgs args, Cube cube);
 #if defined(WIN32)
 #include <conio.h>
 #else
-#include "../common/conio.h"
+//#include "../common/conio.h"
 #endif
 
 using namespace irrklang;
@@ -89,12 +91,11 @@ int main()
 {
     std::cout << "Start..." << std::endl;
     ISoundEngine* engine = createIrrKlangDevice();
-
     if (!engine) {
         printf("Could not startup enginen");
         return 0; // error starting up the engine
     }
-    //engine->play2D("C://Users//ar725//Desktop//new-graph//irrKlang-1.6.0//media//getout.ogg", true);
+    engine->play2D("/home/tao/qt-projects/new-graph/qt-opengl-graph/irrKlang-64bit-1.6.0/media/getout.ogg", true);
 
     glm::vec3(0.0f, 0.0f, 3.0f);
     //-------------------------------------------- GLFW CONFIGS ---------------
@@ -343,10 +344,10 @@ int main()
     //framebuffer test(SCR_WIDTH, SCR_HEIGHT);
     //BloomMapping screen(SCR_WIDTH, SCR_HEIGHT);
     RM::GetShader("model").Use();
-    Model nanosoult("C://Users//ar725//Documents//qt//graph//settings//models//nanosuit//nanosuit.obj");
+    Model nanosoult(std::filesystem::current_path().string() + "/../qt-opengl-graph/settings//models//nanosuit//nanosuit.obj");
     //Model nanosoult("C://Users//ar725//Documents//qt//graph//settings//models//sponza//sponza.obj");
     //Model nanosoult("C://Users//ar725//Documents//qt//graph//settings//models//black_girl//girl.obj");
-    Model rock("C://Users//ar725//Documents//qt//graph//settings//models//rock//rock.obj");
+    Model rock(std::filesystem::current_path().string() + "/../qt-opengl-graph//settings//models//rock//rock.obj");
     imgu_manager interf(window);
     ShaderGlobalBuffer shProjView({ "cube", "light", "stencil",
                                     "model", "cluster", "instance",

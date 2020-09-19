@@ -2,9 +2,9 @@
 #define CUBE_H
 #include <iostream>
 #include <cmath>
-#include <settings/libs/glad/glad.h>
-#include <settings/libs/glm/glm.hpp>
-#include <settings/libs/glm/gtc/matrix_transform.hpp>
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "../classes/shader.h"
 #include "../classes/resource_manager.h"
 #include "light.h"

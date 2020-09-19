@@ -1,8 +1,8 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <settings/libs/glm/glm.hpp>
-#include <settings/libs/glm/gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "shader.h"
 #include "resource_manager.h"
@@ -20,7 +20,7 @@ public:
     std::vector<Mesh> meshes;
     std::string directory;
     /*  Functions   */
-    Model(const char *path)
+    Model(std::string path)
     {
         loadModel(path);
     }

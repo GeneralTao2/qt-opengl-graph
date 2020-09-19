@@ -7,10 +7,12 @@
 #include <map>
 //#include <settings/libs/soil/SOIL.h>
 #include "stb_image.h"
-#include <settings/libs/glad/glad.h>
+#include <glad/glad.h>
 #include "texture.h"
 #include "shader.h"
 #include "decor.h"
+
+#include <filesystem>
 
 class RM
 {

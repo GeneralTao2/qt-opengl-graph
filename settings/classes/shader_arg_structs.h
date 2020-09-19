@@ -1,9 +1,9 @@
 #ifndef SHADER_ARG_STRUCTS_H
 #define SHADER_ARG_STRUCTS_H
 
-#include <settings/libs/glad/glad.h>
-#include <settings/libs/glm/glm.hpp>
-#include <settings/libs/glm/gtc/matrix_transform.hpp>
+//#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "shader.h"
 #include "resource_manager.h"
 

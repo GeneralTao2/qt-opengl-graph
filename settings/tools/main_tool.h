@@ -1,9 +1,9 @@
 #ifndef MAIN_TOOL_H
 #define MAIN_TOOL_H
 
-#include <settings/libs/glad/glad.h>
-#include <settings/libs/glm/glm.hpp>
-#include <settings/libs/glm/gtc/matrix_transform.hpp>
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <vector>
 

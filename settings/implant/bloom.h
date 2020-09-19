@@ -1,13 +1,12 @@
 #ifndef BLOOM_H
 #define BLOOM_H
 
-#include <glfw3.h>
-
 #include "settings/classes/stb_image.h"
 
-#include <settings/libs/glad/glad.h>
-#include <settings/libs/glm/glm.hpp>
-#include <settings/libs/glm/gtc/matrix_transform.hpp>
+#include <glad/glad.h>
+#include <glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <settings/classes/shader.h>
 #include "settings/objects/camera.h"

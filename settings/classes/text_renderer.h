@@ -3,10 +3,15 @@
 
 
 #include <map>
+#include <iostream>
 
-#include <settings/libs/glad/glad.h>
-#include <settings/libs/glm/glm.hpp>
-#include <settings/libs/glm/gtc/matrix_transform.hpp>
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include "resource_manager.h"
 
 #include "texture.h"
 #include "shader.h"
@@ -42,3 +47,4 @@ private:
 };
 
 #endif // TEXT_RENDERER_H
+

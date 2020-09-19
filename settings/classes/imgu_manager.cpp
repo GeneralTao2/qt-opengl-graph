@@ -123,3 +123,4 @@ void imgu_manager::drowHeightMappingProps(HeightMappingProps &data) {
     ImGui::SliderFloat("height_scale", &data.height_scale, 0, 1);
     ImGui::End();
 }
+

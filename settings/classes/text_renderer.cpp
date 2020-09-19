@@ -1,12 +1,4 @@
-#include <iostream>
-
-#include <settings/libs/glm/gtc/matrix_transform.hpp>
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include "text_renderer.h"
-#include "resource_manager.h"
-
 
 TextRenderer::TextRenderer(GLuint width, GLuint height)
 {
@@ -132,3 +124,4 @@ void TextRenderer::RenderText(std::string text, GLfloat x, GLfloat y, GLfloat sc
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
+

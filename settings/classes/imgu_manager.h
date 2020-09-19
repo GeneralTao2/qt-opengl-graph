@@ -2,8 +2,10 @@
 #define IMGU_MANAGER_H
 
 #include <iostream>
-#include <glfw3.h>
+//#include <glfw3.h>
 #include "decor.h"
+
+//#define IMGUI_IMPL_OPENGL_LOADER_GLEW
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -37,3 +39,4 @@ public:
 };
 
 #endif // IMGU_MANAGER_H
+
