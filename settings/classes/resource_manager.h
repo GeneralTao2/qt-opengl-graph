@@ -12,7 +12,15 @@
 #include "shader.h"
 #include "decor.h"
 
-#include <filesystem>
+#include "SOIL2.h"
+
+#if defined(_WIN64)
+    #include <experimental/filesystem>
+    namespace fs = std::experimental::filesystem;
+#elif defined(__linux__)
+    #include <filesystem>
+    namespace fs = std::filesystem;
+#endif
 
 class RM
 {

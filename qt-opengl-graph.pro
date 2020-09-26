@@ -6,8 +6,13 @@ QMAKE_CXXFLAGS += -g3
 
 QT += opengl
 
-LIBS += -lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lpng16 -lm -lz -lbz2 -lharfbuzz -lglib-2.0# -lz -lglut -lGL -lGLU
+linux-g++* {
+ LIBS += -lglfw3 -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lpng16 -lm -lz -lbz2 -lharfbuzz -lglib-2.0
+}
 
+win32 {
+ LIBS += -lopengl32 -lstdc++fs
+}
 
 SOURCES += \
         main.cpp \
@@ -212,10 +217,12 @@ DISTFILES += \
 #INCLUDEPATH += $$PWD/assimp-4.0.1/include
 #INCLUDEPATH += $$PWD/assimp-4.0.1-build/include
 
+
+
 #------------------------------------------FREETYPE-------------------------
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../freetype2/freetype2-build/release/ -lfreetype
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../freetype2/freetype2-build/debug/ -lfreetype
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../freetype2/freetype2-build/release/ -lfreetyper
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../freetype2/freetype2-build/ -lfreetyped
 else:unix:!macx: LIBS += -L$$PWD/../freetype2/freetype2-build/ -lfreetype
 
 INCLUDEPATH += $$PWD/../freetype2/include
@@ -224,22 +231,16 @@ DEPENDPATH += $$PWD/../freetype2/include
 INCLUDEPATH += $$PWD/../freetype2/freetype2-build/include
 DEPENDPATH += $$PWD/../freetype2/freetype2-build/include
 
-#INCLUDEPATH += $$PWD/../freetype2/src/bzip2
-#DEPENDPATH += $$PWD/../freetype2/src/bzip2
-#
-#INCLUDEPATH += $$PWD/../freetype2/src/sfnt
-#DEPENDPATH += $$PWD/../freetype2/src/sfnt
-
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/release/libfreetype.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/debug/libfreetype.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/release/freetype.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/debug/freetype.lib
-else:unix:!macx: PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/libfreetype.a
+#win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/release/libfreetyper.a
+#else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/debug/libfreetyped.a
+#else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/release/freetyper.lib
+#else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/debug/freetyped.lib
+#else:unix:!macx: PRE_TARGETDEPS += $$PWD/../freetype2/freetype2-build/libfreetype.a
 
 #-------------------------------------------ASSIMP--------------------------
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../assimp/assimp-build/bin/release/ -lassimp
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../assimp/assimp-build/bin/debug/ -lassimp
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../assimp/assimp-build/code/ -lassimp.dll
 else:unix:!macx: LIBS += -L$$PWD/../assimp/assimp-build/bin/ -lassimp
 
 INCLUDEPATH += $$PWD/../assimp/include
@@ -251,26 +252,34 @@ DEPENDPATH += $$PWD/../assimp/assimp-build/include
 #--------------------------------------------GLFW---------------------------
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../glfw/glfw-build/src/release/ -lglfw3
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../glfw/glfw-build/src/debug/ -lglfw3
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../glfw/glfw-build/src -lglfw3
 else:unix:!macx: LIBS += -L$$PWD/../glfw/glfw-build/src/ -lglfw3
+
+#linux-g++* {
+# # your includes
+#}
+#
+#win32 {
+# # your includes
+#}
 
 INCLUDEPATH += $$PWD/../glfw/include/GLFW
 DEPENDPATH += $$PWD/../glfw/include/GLFW
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../glfw/glfw-build/src/release/libglfw3.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../glfw/glfw-build/src/debug/libglfw3.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../glfw/glfw-build/src/release/glfw3.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../glfw/glfw-build/src/debug/glfw3.lib
-else:unix:!macx: PRE_TARGETDEPS += $$PWD/../glfw/glfw-build/src/libglfw3.a
+#win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../glfw/glfw-build/src/release/libglfw3.a
+#else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../glfw/lib-mingw/libglfw3.a
+#else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../glfw/glfw-build/src/release/glfw3.lib
+#else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../glfw/lib-mingw/glfw3.lib
+#else:unix:!macx: PRE_TARGETDEPS += $$PWD/../glfw/glfw-build/src/libglfw3.a
 
 #------------------------------------------IrrKlang-------------------------
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/irrKlang-64bit-1.6.0/bin/linux-gcc-64/release/ -lIrrKlang
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/irrKlang-64bit-1.6.0/bin/linux-gcc-64/debug/ -lIrrKlang
-else:unix: LIBS += -L$$PWD/irrKlang-64bit-1.6.0/bin/linux-gcc-64/ -lIrrKlang
-
-INCLUDEPATH += $$PWD/irrKlang-64bit-1.6.0/include
-DEPENDPATH += $$PWD/irrKlang-64bit-1.6.0/include
+#win32:CONFIG(release, debug|release): LIBS += -L$$PWD/irrKlang-64bit-1.6.0/bin/linux-gcc-64/release/ -lIrrKlang
+#else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/irrKlang-64bit-1.6.0/bin/linux-gcc-64/release/ -lIrrKlang
+#else:unix: LIBS += -L$$PWD/irrKlang-64bit-1.6.0/bin/linux-gcc-64/ -lIrrKlang
+#
+#INCLUDEPATH += $$PWD/irrKlang-64bit-1.6.0/include
+#DEPENDPATH += $$PWD/irrKlang-64bit-1.6.0/include
 
 #------------------------------------------Other-----------------------------
 
@@ -289,3 +298,27 @@ DEPENDPATH += $$PWD/../imgui/examples/
 INCLUDEPATH += $$PWD/settings/libs/
 DEPENDPATH += $$PWD/settings/libs/
 
+INCLUDEPATH += $$PWD/../SOIL2/incs
+DEPENDPATH += $$PWD/../SOIL2/incs
+
+
+win32:CONFIG(release, debug|release): LIBS += -LE:/Programs/qt/Tools/mingw730_64/x86_64-w64-mingw32/lib/ -lgdi32
+else:win32:CONFIG(debug, debug|release): LIBS += -LE:/Programs/qt/Tools/mingw730_64/x86_64-w64-mingw32/lib/ -lgdi32
+
+#INCLUDEPATH += E:/Programs/qt/Tools/mingw730_64/x86_64-w64-mingw32/include
+#DEPENDPATH += E:/Programs/qt/Tools/mingw730_64/x86_64-w64-mingw32/include
+
+#win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../glfw/lib-mingw/ -lglfw3
+#else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../glfw/lib-mingw/ -lglfw3d
+#else:unix:!macx: LIBS += -L$$PWD/../glfw/lib-mingw/ -lglfw3
+#
+#INCLUDEPATH += $$PWD/../glfw/lib-mingw
+#DEPENDPATH += $$PWD/../glfw/lib-mingw
+
+unix:!macx|win32: LIBS += -L$$PWD/../alure/build/ -llibalure2_s
+
+INCLUDEPATH += $$PWD/../alure/include/AL
+DEPENDPATH += $$PWD/../alure/include/AL
+
+INCLUDEPATH += $$PWD/../alure/include
+DEPENDPATH += $$PWD/../alure/include

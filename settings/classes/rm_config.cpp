@@ -1,7 +1,7 @@
 #include "resource_manager.h"
 
 void RM_Init() {
-    RM::path = std::filesystem::current_path().string() + "/../qt-opengl-graph/";
+    RM::path = fs::current_path().string() + "/../qt-opengl-graph/";
     RM::toShaders = "settings//shaders//";
     RM::toTextures = "settings//textures//";
     RM::toVertices = "settings//vertices//";

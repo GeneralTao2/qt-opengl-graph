@@ -226,13 +226,14 @@ std::vector<float>  RM::loadVerticesFromFile(std::string file) {
 unsigned int RM::TextureFromFile(const char *path, const std::string &directory, bool gamma)
 {
     std::string filename = std::string(path);
-    filename = directory + '/' + filename;
+    filename = directory + "/" + filename;
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
     unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+    //unsigned char* data = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_AUTO);
     if (data)
     {
         GLenum format;

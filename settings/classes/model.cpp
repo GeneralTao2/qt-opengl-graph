@@ -122,6 +122,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
         {
             aiString str;
             mat->GetTexture(type, i, &str);
+            //std::cout << directory << std::endl;
             bool skip = false;
             for(unsigned int j = 0; j < textures_loaded.size(); j++)
             {
@@ -135,8 +136,6 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
             if(!skip)
             {   // if texture hasn't been loaded already, load it
                 Texture texture;
-                //std::string path = std::string(str.C_Str()) + '/' + directory;
-                //texture.id = TextureFromFile(str.C_Str(), directory);
                 texture.id = RM::TextureFromFile(str.C_Str(), directory);
                 texture.type = typeName;
                 texture.path = str.C_Str();

@@ -38,7 +38,13 @@
 #include "settings/classes/bloom_mapping.h"
 #include "settings/implant/bloom.h"
 
-#include <filesystem>
+#if defined(_WIN64)
+    #include <experimental/filesystem>
+    namespace fs = std::experimental::filesystem;
+#elif defined(__linux__)
+    #include <filesystem>
+    namespace fs = std::filesystem;
+#endif
 
 
 static void glfw_error_callback(int error, const char* description)
@@ -77,7 +83,7 @@ float lastCursorReaction = 0;
 void renderOmniShadowScene(ShadowOmniMapArgs args, Cube cube);
 void renderOmniShadowScene(PhongOmniShadowArgs args, Cube cube);
 
-#include <irrKlang.h>
+/*#include <irrKlang.h>
 
 #if defined(WIN32)
 #include <conio.h>
@@ -85,18 +91,77 @@ void renderOmniShadowScene(PhongOmniShadowArgs args, Cube cube);
 //#include "../common/conio.h"
 #endif
 
-using namespace irrklang;
+using namespace irrklang;*/
 
-int main()
+#include <string.h>
+
+#include <iostream>
+#include <iomanip>
+#include <thread>
+#include <chrono>
+
+#include "alure2.h"
+
+int main(int argc, char *argv[])
 {
-    std::cout << "Start..." << std::endl;
+    alure::ArrayView<const char*> args(argv, argc);
+
+       if(args.size() < 2)
+       {
+           std::cerr<< "Usage: "<<args.front()<<" [-device \"device name\"] files..." <<std::endl;
+           return 1;
+       }
+       args = args.slice(1);
+
+       alure::DeviceManager devMgr = alure::DeviceManager::getInstance();
+
+       alure::Device dev;
+       if(args.size() > 2 && args[0] == alure::StringView("-device"))
+       {
+           dev = devMgr.openPlayback(args[1], std::nothrow);
+           if(!dev) std::cerr<< "Failed to open \""<<args[1]<<"\" - trying default" <<std::endl;
+           args = args.slice(2);
+       }
+       if(!dev) dev = devMgr.openPlayback();
+       std::cout<< "Opened \""<<dev.getName()<<"\"" <<std::endl;
+
+       alure::Context ctx = dev.createContext();
+       alure::Context::MakeCurrent(ctx);
+
+       for(;!args.empty();args = args.slice(1))
+       {
+           alure::Buffer buffer = ctx.getBuffer(args.front());
+           alure::Source source = ctx.createSource();
+           source.play(buffer);
+           std::cout<< "Playing "<<args.front()<<" ("
+                    << alure::GetSampleTypeName(buffer.getSampleType())<<", "
+                    << alure::GetChannelConfigName(buffer.getChannelConfig())<<", "
+                    << buffer.getFrequency()<<"hz)" <<std::endl;
+
+           while(source.isPlaying())
+           {
+               std::cout<< "\r "<<source.getSampleOffset()<<" / "<<buffer.getLength() <<std::flush;
+               std::this_thread::sleep_for(std::chrono::milliseconds(25));
+               ctx.update();
+           }
+           std::cout<<std::endl;
+
+           source.destroy();
+           ctx.removeBuffer(buffer);
+       }
+
+       alure::Context::MakeCurrent(nullptr);
+       ctx.destroy();
+       dev.close();
+
+    /*std::cout << "Start..." << std::endl;
     ISoundEngine* engine = createIrrKlangDevice();
     if (!engine) {
         printf("Could not startup enginen");
         return 0; // error starting up the engine
     }
     engine->play2D("/home/tao/qt-projects/new-graph/qt-opengl-graph/irrKlang-64bit-1.6.0/media/getout.ogg", true);
-
+*/
     glm::vec3(0.0f, 0.0f, 3.0f);
     //-------------------------------------------- GLFW CONFIGS ---------------
     camera.MovementSpeed = 6;
@@ -344,10 +409,10 @@ int main()
     //framebuffer test(SCR_WIDTH, SCR_HEIGHT);
     //BloomMapping screen(SCR_WIDTH, SCR_HEIGHT);
     RM::GetShader("model").Use();
-    Model nanosoult(std::filesystem::current_path().string() + "/../qt-opengl-graph/settings//models//nanosuit//nanosuit.obj");
-    //Model nanosoult("C://Users//ar725//Documents//qt//graph//settings//models//sponza//sponza.obj");
-    //Model nanosoult("C://Users//ar725//Documents//qt//graph//settings//models//black_girl//girl.obj");
-    Model rock(std::filesystem::current_path().string() + "/../qt-opengl-graph//settings//models//rock//rock.obj");
+    Model nanosoult(fs::current_path().string() + "/../qt-opengl-graph/settings//models//nanosuit//nanosuit.obj");
+    //Model nanosoult(fs::current_path().string() + "/../qt-opengl-graph//settings//models//sponza//sponza.obj");
+    //Model nanosoult(fs::current_path().string() + "/../qt-opengl-graph/settings//models//black_girl//girl.obj");
+    Model rock(fs::current_path().string() + "/../qt-opengl-graph//settings//models//rock//rock.obj");
     imgu_manager interf(window);
     ShaderGlobalBuffer shProjView({ "cube", "light", "stencil",
                                     "model", "cluster", "instance",
