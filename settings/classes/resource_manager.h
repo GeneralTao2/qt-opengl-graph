@@ -12,7 +12,7 @@
 #include "shader.h"
 #include "decor.h"
 
-#include "SOIL2.h"
+//#include "SOIL2.h"
 
 #if defined(_WIN64)
     #include <experimental/filesystem>

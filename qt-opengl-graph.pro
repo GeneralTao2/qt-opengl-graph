@@ -13,7 +13,7 @@ linux-g++* {
 win32 {
  LIBS += -lopengl32 -lstdc++fs
 }
-
+#sudo pacman -S lib32-openal libogg libvorbis opusfile libsndfile physfs libdumb
 SOURCES += \
         main.cpp \
     settings/classes/anti_aliasing.cpp \
@@ -315,7 +315,7 @@ else:win32:CONFIG(debug, debug|release): LIBS += -LE:/Programs/qt/Tools/mingw730
 #INCLUDEPATH += $$PWD/../glfw/lib-mingw
 #DEPENDPATH += $$PWD/../glfw/lib-mingw
 
-unix:!macx|win32: LIBS += -L$$PWD/../alure/build/ -llibalure2_s
+unix:!macx|win32: LIBS += -L$$PWD/../alure/build/ -lalure2
 
 INCLUDEPATH += $$PWD/../alure/include/AL
 DEPENDPATH += $$PWD/../alure/include/AL
